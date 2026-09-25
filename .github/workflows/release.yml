@@ -33,11 +33,11 @@ jobs:
       - name: Install FFmpeg
         run: brew install ffmpeg pkg-config
       - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.QT_ROOT_DIR }}"
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$QT_ROOT_DIR
       - name: Build
         run: cmake --build build --config Release
       - name: Deploy Qt
-        run: "${{ env.QT_ROOT_DIR }}/bin/macdeployqt" build/OpenDaw_artefacts/Release/OpenDaw.app
+        run: $QT_ROOT_DIR/bin/macdeployqt build/OpenDaw_artefacts/Release/OpenDaw.app
       - name: Sign app ad hoc
         run: codesign --force --deep --sign - build/OpenDaw_artefacts/Release/OpenDaw.app
       - name: Package DMG
