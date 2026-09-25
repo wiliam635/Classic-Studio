@@ -1,6 +1,8 @@
 name: Classic Studio macOS Build
 
 on:
+  push:
+    branches: [master]
   workflow_dispatch:
 
 permissions:
