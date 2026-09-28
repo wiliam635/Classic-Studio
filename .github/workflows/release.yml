@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build-macos:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,6 +34,11 @@ jobs:
         run: brew install ffmpeg pkg-config
       - name: Configure
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$QT_ROOT_DIR
+      - name: Remove deprecated AGL link flags
+        run: |
+          while IFS= read -r file; do
+            perl -pi -e 's/-framework\s+AGL//g; s/-Wl,-framework,AGL//g' "$file"
+          done < <(grep -RIl -e 'AGL' build || true)
       - name: Build
         run: cmake --build build --config Release
       - name: Deploy Qt
