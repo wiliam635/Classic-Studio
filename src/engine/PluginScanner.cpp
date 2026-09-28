@@ -1,6 +1,7 @@
 #include "PluginScanner.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <QDebug>
+#include <vector>
 
 namespace OpenDaw {
 
@@ -21,19 +22,53 @@ void PluginScanWorker::doScan()
     juce::VSTPluginFormat  vst2;
 #endif
 
-    FormatInfo formats[] = {
-        { &vst3, "VST3" },
+    std::vector<FormatInfo> formats = {
+        { &vst3, "VST3" }
 #if JUCE_PLUGINHOST_VST
-        { &vst2, "VST2" },
+        , { &vst2, "VST2" }
 #endif
     };
+
+#if JUCE_MAC
+    // JUCE's defaults cover the standard locations, but keeping the paths
+    // explicit makes the macOS scan predictable and covers per-user plugins.
+    const auto userHome = juce::File::getSpecialLocation(
+        juce::File::userHomeDirectory);
+    const juce::File userVst3 = userHome.getChildFile(
+        "Library/Audio/Plug-Ins/VST3");
+    const juce::File systemVst3(
+        "/Library/Audio/Plug-Ins/VST3");
+
+    auto addPathIfPresent = [](juce::FileSearchPath& paths,
+                               const juce::File& path) {
+        if (path.isDirectory())
+            paths.add(path.getFullPathName());
+    };
+#endif
+
+#if JUCE_MAC && JUCE_PLUGINHOST_AU
+    juce::AudioUnitPluginFormat audioUnit;
+    formats.push_back({ &audioUnit, "Audio Unit" });
+#endif
 
     juce::StringArray allFiles;
     juce::Array<juce::AudioPluginFormat*> fileFormats;
 
     for (auto& fmt : formats) {
         auto paths = fmt.format->getDefaultLocationsToSearch();
+
+#if JUCE_MAC
+        if (fmt.format == &vst3) {
+            addPathIfPresent(paths, userVst3);
+            addPathIfPresent(paths, systemVst3);
+            qInfo() << "[PluginScanner] macOS VST3 paths:"
+                    << QString::fromStdString(paths.toString().toStdString());
+        }
+#endif
+
         auto files = fmt.format->searchPathsForPlugins(paths, true, true);
+        qInfo() << "[PluginScanner] scanning" << fmt.label << ":"
+                << files.size() << "candidate(s)";
         for (auto& f : files) {
             allFiles.add(f);
             fileFormats.add(fmt.format);
