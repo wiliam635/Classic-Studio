@@ -82,9 +82,9 @@ static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep)
 int main(int argc, char* argv[])
 {
     QApplication qtApp(argc, argv);
-    qtApp.setApplicationName("OpenDaw");
+    qtApp.setApplicationName("Classic Studio");
     qtApp.setApplicationVersion(OpenDaw_VERSION);
-    qtApp.setOrganizationName("OpenDaw");
+    qtApp.setOrganizationName("Classic Studio");
 
     qtApp.setWindowIcon(QIcon(":/icon.png"));
 
