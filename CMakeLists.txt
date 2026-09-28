@@ -185,6 +185,10 @@ target_compile_definitions(OpenDaw PRIVATE
     DONT_SET_USING_JUCE_NAMESPACE=1
     TRACKTION_ENABLE_TIMESTRETCH_SOUNDTOUCH=1)
 
+if(APPLE)
+    target_compile_definitions(OpenDaw PRIVATE JUCE_PLUGINHOST_AU=1)
+endif()
+
 target_link_libraries(OpenDaw PRIVATE
     Qt6::Widgets
     Qt6::Network
